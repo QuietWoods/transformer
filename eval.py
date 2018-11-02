@@ -42,7 +42,8 @@ def eval():
             mname = open(hp.logdir + '/checkpoint', 'r').read().split('"')[1] # model name
              
             ## Inference
-            if not os.path.exists('results'): os.mkdir('results')
+            if not os.path.exists('results'):
+                os.mkdir('results')
             with codecs.open("results/" + mname, "w", "utf-8") as fout:
                 list_of_refs, hypotheses = [], []
                 for i in range(len(X) // hp.batch_size):
@@ -76,9 +77,8 @@ def eval():
                 ## Calculate bleu score
                 score = corpus_bleu(list_of_refs, hypotheses)
                 fout.write("Bleu Score = " + str(100*score))
-                                          
+
+
 if __name__ == '__main__':
     eval()
     print("Done")
-    
-    

@@ -12,14 +12,15 @@ import numpy as np
 import codecs
 import regex
 
+
 def load_de_vocab():
-    vocab = [line.split()[0] for line in codecs.open('preprocessed/de.vocab.tsv', 'r', 'utf-8').read().splitlines() if int(line.split()[1])>=hp.min_cnt]
+    vocab = [line.split()[0] for line in codecs.open('vocabulary/source.vocab.tsv', 'r', 'utf-8').read().splitlines() if int(line.split()[1])>=hp.min_cnt]
     word2idx = {word: idx for idx, word in enumerate(vocab)}
     idx2word = {idx: word for idx, word in enumerate(vocab)}
     return word2idx, idx2word
 
 def load_en_vocab():
-    vocab = [line.split()[0] for line in codecs.open('preprocessed/en.vocab.tsv', 'r', 'utf-8').read().splitlines() if int(line.split()[1])>=hp.min_cnt]
+    vocab = [line.split()[0] for line in codecs.open('vocabulary/target.vocab.tsv', 'r', 'utf-8').read().splitlines() if int(line.split()[1])>=hp.min_cnt]
     word2idx = {word: idx for idx, word in enumerate(vocab)}
     idx2word = {idx: word for idx, word in enumerate(vocab)}
     return word2idx, idx2word
@@ -48,21 +49,18 @@ def create_data(source_sents, target_sents):
     
     return X, Y, Sources, Targets
 
+
 def load_train_data():
-    de_sents = [regex.sub("[^\s\p{Latin}']", "", line) for line in codecs.open(hp.source_train, 'r', 'utf-8').read().split("\n") if line and line[0] != "<"]
-    en_sents = [regex.sub("[^\s\p{Latin}']", "", line) for line in codecs.open(hp.target_train, 'r', 'utf-8').read().split("\n") if line and line[0] != "<"]
+    de_sents = [line for line in codecs.open(hp.source_train, 'r', 'utf-8').read().split("\n") if line]
+    en_sents = [line for line in codecs.open(hp.target_train, 'r', 'utf-8').read().split("\n") if line]
     
     X, Y, Sources, Targets = create_data(de_sents, en_sents)
     return X, Y
-    
+
+
 def load_test_data():
-    def _refine(line):
-        line = regex.sub("<[^>]+>", "", line)
-        line = regex.sub("[^\s\p{Latin}']", "", line) 
-        return line.strip()
-    
-    de_sents = [_refine(line) for line in codecs.open(hp.source_test, 'r', 'utf-8').read().split("\n") if line and line[:4] == "<seg"]
-    en_sents = [_refine(line) for line in codecs.open(hp.target_test, 'r', 'utf-8').read().split("\n") if line and line[:4] == "<seg"]
+    de_sents = [line for line in codecs.open(hp.source_test, 'r', 'utf-8').read().split("\n") if line]
+    en_sents = [line for line in codecs.open(hp.target_test, 'r', 'utf-8').read().split("\n") if line]
         
     X, Y, Sources, Targets = create_data(de_sents, en_sents)
     return X, Sources, Targets # (1064, 150)
