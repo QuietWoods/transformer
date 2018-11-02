@@ -8,10 +8,14 @@ https://www.github.com/kyubyong/transformer
 class Hyperparams:
     '''Hyperparameters'''
     # data
-    source_train = 'corpora/train.tags.de-en.de'
-    target_train = 'corpora/train.tags.de-en.en'
-    source_test = 'corpora/IWSLT16.TED.tst2014.de-en.de.xml'
-    target_test = 'corpora/IWSLT16.TED.tst2014.de-en.en.xml'
+    source_train = 'corpora/train.source-target.source'
+    #source_train = 'corpora/train.tags.de-en.de'
+    target_train = 'corpora/train.source-target.target'
+    #target_train = 'corpora/train.tags.de-en.en'
+    source_test = 'corpora/test.source-target.source'
+    #source_test = 'corpora/IWSLT16.TED.tst2014.de-en.de.xml'
+    target_test = 'corpora/test.source-target.target'
+    #target_test = 'corpora/IWSLT16.TED.tst2014.de-en.en.xml'
     
     # training
     batch_size = 32 # alias = N

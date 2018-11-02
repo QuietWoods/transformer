@@ -22,12 +22,13 @@ try:
 except KeyError:
     print('please use environment variable to specify data directories')
 
-train_source = open("/home/wanglei/data/train.source-target.source", 'w', encoding='utf-8')
-train_target = open("/home/wanglei/data/train.source-target.target", 'w', encoding='utf-8')
+train_source = open("corpora/train.source-target.source", 'w', encoding='utf-8')
+train_target = open("corpora/train.source-target.target", 'w', encoding='utf-8')
 
-test_source = open("/home/wanglei/data/test.source-target.source", 'w', encoding='utf-8')
-test_target = open("/home/wanglei/data/test.source-target.source", 'w', encoding='utf-8')
+test_source = open("corpora/test.source-target.source", 'w', encoding='utf-8')
+test_target = open("corpora/test.source-target.target", 'w', encoding='utf-8')
 
+patents = 10
 
 def _split_words(texts):
     return map(lambda t: t.split(), texts)
@@ -49,7 +50,7 @@ def get_extract_label(art_sents, abs_sents):
             break
     return extracted, scores
 
-@curry
+
 def process(split, i):
     data_dir = join(DATA_DIR, split)
     with open(join(data_dir, '{}.json'.format(i))) as f:
@@ -57,15 +58,32 @@ def process(split, i):
     tokenize = compose(list, _split_words)
     art_sents = tokenize(data['article'])
     abs_sents = tokenize(data['abstract'])
+    if len(abs_sents) <= 0:
+        return
     if art_sents and abs_sents: # some data contains empty article/abstract
         extracted, scores = get_extract_label(art_sents, abs_sents)
     else:
         extracted, scores = [], []
-    extracted_sents = [art_sents[i] for i in extracted]
+    #print("extracted")
+    #print(extracted)
+    extracted_sents = [" ".join(art_sents[int(i)]) for i in extracted]
+    #print("ext_sents")
+    #print(extracted_sents)
     # 关键句集合
-    train_source.write('\n'.join(extracted_sents))
     # 关键句对应的摘要句集合
-    train_target.write('\n'.join(abs_sents))
+    #print("abs_sents")
+    #print(abs_sents)
+    abs_sents = [" ".join(sent) for sent in abs_sents]
+    # 确保句对完整
+    abs_len = len(abs_sents)
+    ext_len = len(extracted_sents)
+    min_length = min(abs_len, ext_len)
+    if split == 'val':
+        test_source.write('\n'.join(extracted_sents[:min_length]))
+        test_target.write('\n'.join(abs_sents[:min_length]))
+    else:     
+        train_source.write('\n'.join(extracted_sents[:min_length]))
+        train_target.write('\n'.join(abs_sents[:min_length]))
 
 
 def label_mp(split):
@@ -86,24 +104,13 @@ def label(split):
     data_dir = join(DATA_DIR, split)
     n_data = count_data(data_dir)
     for i in range(n_data):
-        print('processing {}/{} ({:.2f}%%)\r'.format(i, n_data, 100*i/n_data),
-              end='')
-        with open(join(data_dir, '{}.json'.format(i))) as f:
-            data = json.loads(f.read())
-        tokenize = compose(list, _split_words)
-        art_sents = tokenize(data['article'])
-        abs_sents = tokenize(data['abstract'])
-        extracted, scores = get_extract_label(art_sents, abs_sents)
-        data['extracted'] = extracted
-        data['score'] = scores
-        with open(join(data_dir, '{}.json'.format(i)), 'w') as f:
-            json.dump(data, f, ensure_ascii=False, indent=4)
+        process(split, i)
     print('finished in {}'.format(timedelta(seconds=time()-start)))
 
 
 def main():
     for split in ['val', 'train']:  # no need of extraction label when testing
-        label_mp(split)
+        label(split)
 
 
 if __name__ == '__main__':
