@@ -168,6 +168,7 @@ if __name__ == '__main__':
                              save_model_secs=0)
     with sv.managed_session() as sess:
         for epoch in range(1, hp.num_epochs+1): 
+            print("epoch {}/{}".format(epoch, hp.num_epochs+1))
             if sv.should_stop(): break
             for step in tqdm(range(g.num_batch), total=g.num_batch, ncols=70, leave=False, unit='b'):
                 sess.run(g.train_op)
