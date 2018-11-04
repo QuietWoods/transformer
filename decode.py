@@ -44,6 +44,9 @@ def eval():
             ## Inference
             if not os.path.exists('results'):
                 os.mkdir('results')
+            source_w = codecs.open("results/" + "source.txt", "w", "utf-8")
+            ref_w = codecs.open("results/" + "ref.txt", "w", "utf-8")
+            line_count = 0
             with codecs.open("results/" + "decode.txt", "w", "utf-8") as fout:
                 list_of_refs, hypotheses = [], []
                 for i in range(len(X) // hp.batch_size):
@@ -64,20 +67,18 @@ def eval():
                         got = " ".join(idx2en[idx] for idx in pred).split("</S>")[0].strip()
                         #fout.write("- source: " + source +"\n")
                         #fout.write("- expected: " + target + "\n")
+                        source_w.write(source + "\n")
+                        ref_w.write(target + "\n")
                         fout.write(got + "\n")
                         fout.flush()
-                          
-                        # bleu score
-                        ref = target.split()
-                        hypothesis = got.split()
-                        if len(ref) > 3 and len(hypothesis) > 3:
-                            list_of_refs.append([ref])
-                            hypotheses.append(hypothesis)
-              
-                ## Calculate bleu score
-                #score = corpus_bleu(list_of_refs, hypotheses)
-                ##fout.write("Bleu Score = " + str(100*score))
+                        source_w.flush()
+                        ref_w.flush()
 
+                        print("line: {}".format(line_count))
+
+            source_w.close()
+            ref_w.close()
+            
 
 if __name__ == '__main__':
     eval()
